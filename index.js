@@ -1,3 +1,4 @@
+// author https://t.me/scamushka
 import 'dotenv/config';
 import ethers from 'ethers';
 import fetch from 'node-fetch';
