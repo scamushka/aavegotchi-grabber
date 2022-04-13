@@ -17,7 +17,7 @@ let numberOfAttempts = 0;
 
 const query = `
   {
-    noWhitelist: gotchiLendings(where:{tokensToShare_contains:["0x403E967b044d4Be25170310157cB1A4Bf10bdD0f","0x44A6e0BE76e1D9620A7F76588e4509fE4fa8E8C8","0x6a3E7C3c6EF65Ee26975b12293cA1AAD7e1dAeD2","0x42E5E06EF5b90Fe15F853F59299Fc96259209c5C"], whitelist:null, timeAgreed:0, cancelled:false}, orderBy:timeCreated, orderDirection:desc) {
+    noWhitelist: gotchiLendings(skip: 0 where:{tokensToShare_contains:["0x403E967b044d4Be25170310157cB1A4Bf10bdD0f","0x44A6e0BE76e1D9620A7F76588e4509fE4fa8E8C8","0x6a3E7C3c6EF65Ee26975b12293cA1AAD7e1dAeD2","0x42E5E06EF5b90Fe15F853F59299Fc96259209c5C"], whitelist:null, timeAgreed:0, cancelled:false}, orderBy:timeCreated, orderDirection:desc) {
       id
       upfrontCost
       period
@@ -54,7 +54,7 @@ async function borrow(signer, listingId, erc721TokenId, initialCost, period, rev
 
 async function main() {
   try {
-    const response = await fetch('https://static.138.182.90.157.clients.your-server.de/subgraphs/name/aavegotchi/aavegotchi-core-matic-lending-two', {
+    const response = await fetch('https://api.thegraph.com/subgraphs/name/froid1911/aavegotchi-lending', {
       method: 'POST',
       body: JSON.stringify({ query }),
     });
