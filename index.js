@@ -41,8 +41,8 @@ async function borrow(signer, listingId, erc721TokenId, initialCost, period, rev
     // ! надо учить ts ❤️
     const borrowTx = await contract.agreeGotchiLending(+listingId, +erc721TokenId, ethers.utils.parseEther(ethers.utils.formatEther(initialCost)), +period, revenueSplit.map(item => +item), {
       gasLimit,
-      maxFeePerGas,
       maxPriorityFeePerGas,
+      maxFeePerGas,
     });
     logger.info('borrow transaction sent');
     await borrowTx.wait();
@@ -66,19 +66,30 @@ async function main() {
       const wallet = new ethers.Wallet(privateKey);
       const signer = wallet.connect(provider);
 
-      try {
-        const feeResponse = await fetch('https://gasstation-mainnet.matic.network/v2');
-        const feeData = await feeResponse.json();
-        maxFeePerGas = ethers.utils.parseUnits(
-          `${Math.ceil(feeData.fast.maxFee)}`,
-          'gwei',
-        );
+      if (process.env.MAX_PRIORITY_FEE && process.env.MAX_FEE) {
         maxPriorityFeePerGas = ethers.utils.parseUnits(
-          `${Math.ceil(feeData.fast.maxPriorityFee)}`,
+          process.env.MAX_PRIORITY_FEE,
           'gwei',
         );
-      } catch (e) {
-        logger.info('maxFeePerGas and maxPriorityFeePerGas by default');
+        maxFeePerGas = ethers.utils.parseUnits(
+          process.env.MAX_FEE,
+          'gwei',
+        );
+      } else {
+        try {
+          const feeResponse = await fetch('https://gasstation-mainnet.matic.network/v2');
+          const feeData = await feeResponse.json();
+          maxPriorityFeePerGas = ethers.utils.parseUnits(
+            `${Math.ceil(feeData.fast.maxPriorityFee)}`,
+            'gwei',
+          );
+          maxFeePerGas = ethers.utils.parseUnits(
+            `${Math.ceil(feeData.fast.maxFee)}`,
+            'gwei',
+          );
+        } catch (e) {
+          logger.info('maxFeePerGas and maxPriorityFeePerGas by default');
+        }
       }
 
       await borrow(signer, gotchi.id, gotchi.gotchi.id, gotchi.upfrontCost, gotchi.period, [gotchi.splitOwner, gotchi.splitBorrower, gotchi.splitOther]);
