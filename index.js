@@ -49,6 +49,10 @@ async function borrow(signer, listingId, erc721TokenId, initialCost, period, rev
     logger.info(`borrow success ${borrowTx.hash}`);
   } catch (e) {
     logger.error(`failure: ${e.message}`);
+
+    if (process.env.REPEAT === 'true') {
+      await main();
+    }
   }
 }
 
