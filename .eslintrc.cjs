@@ -11,6 +11,6 @@ module.exports = {
     'arrow-parens': ['error', 'as-needed'],
     'max-len': 'off',
     'import/extensions': 'off',
-    'no-use-before-define': 'nofunc',
+    'no-use-before-define': ['error', { functions: false }],
   },
 };
