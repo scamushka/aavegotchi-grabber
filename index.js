@@ -17,17 +17,22 @@ let numberOfAttempts = 0;
 
 const query = `
   {
-    noWhitelist: gotchiLendings(skip: 0 where:{tokensToShare_contains:["0x403E967b044d4Be25170310157cB1A4Bf10bdD0f","0x44A6e0BE76e1D9620A7F76588e4509fE4fa8E8C8","0x6a3E7C3c6EF65Ee26975b12293cA1AAD7e1dAeD2","0x42E5E06EF5b90Fe15F853F59299Fc96259209c5C"], whitelist:null, timeAgreed:0, cancelled:false}, orderBy:timeCreated, orderDirection:desc) {
+    noWhitelist: gotchiLendings(
+      skip: 0
+      where: {tokensToShare_contains: ["0x403E967b044d4Be25170310157cB1A4Bf10bdD0f", "0x44A6e0BE76e1D9620A7F76588e4509fE4fa8E8C8", "0x6a3E7C3c6EF65Ee26975b12293cA1AAD7e1dAeD2", "0x42E5E06EF5b90Fe15F853F59299Fc96259209c5C"], period_gte: ${minPeriod}, whitelist: null, timeAgreed: 0, cancelled: false}
+      orderBy: timeCreated
+      orderDirection: desc
+    ) {
       id
       upfrontCost
       period
       gotchi {
-        id
         level
       }
       splitOther
       splitBorrower
       splitOwner
+      gotchiTokenId
     }
   }
 `;
@@ -63,10 +68,10 @@ async function main() {
       body: JSON.stringify({ query }),
     });
     const data = await response.json();
-    const gotchi = data.data.noWhitelist.find(listing => +listing.upfrontCost <= maxCost && +listing.period >= minPeriod && +listing.gotchi.level >= minLevel && +listing.splitBorrower >= minSplitBorrower);
+    const listing = data.data.noWhitelist.find(item => +item.upfrontCost <= maxCost && +item.gotchi.level >= minLevel && +item.splitBorrower >= minSplitBorrower);
 
-    if (gotchi) {
-      logger.info(gotchi);
+    if (listing) {
+      logger.info(listing);
       const wallet = new ethers.Wallet(privateKey);
       const signer = wallet.connect(provider);
 
@@ -96,7 +101,7 @@ async function main() {
         }
       }
 
-      await borrow(signer, gotchi.id, gotchi.gotchi.id, gotchi.upfrontCost, gotchi.period, [gotchi.splitOwner, gotchi.splitBorrower, gotchi.splitOther]);
+      await borrow(signer, listing.id, listing.gotchiTokenId, listing.upfrontCost, listing.period, [listing.splitOwner, listing.splitBorrower, listing.splitOther]);
     } else {
       numberOfAttempts += 1;
       logger.info(`not found, try again ${numberOfAttempts}`);
