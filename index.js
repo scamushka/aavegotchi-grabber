@@ -2,6 +2,7 @@
 import 'dotenv/config';
 import ethers from 'ethers';
 import fetch from 'node-fetch';
+import { setTimeout } from 'timers/promises';
 import logger from './logger.js';
 
 const provider = new ethers.providers.JsonRpcProvider(process.env.RPC);
@@ -27,6 +28,7 @@ const query = `
       upfrontCost
       period
       gotchi {
+        id
         level
       }
       splitOther
@@ -52,6 +54,12 @@ async function borrow(signer, listingId, erc721TokenId, initialCost, period, rev
     logger.info('borrow transaction sent');
     await borrowTx.wait();
     logger.info(`borrow success ${borrowTx.hash}`);
+
+    if (process.env.WAIT_AFTER_BUY === 'true') {
+      logger.info(`waiting ${(+period - 3600) / 3600} hour(s)`);
+      await setTimeout((+period - 3600) * 1000);
+      await main();
+    }
   } catch (e) {
     logger.error(`failure: ${e.message}`);
 
@@ -63,7 +71,7 @@ async function borrow(signer, listingId, erc721TokenId, initialCost, period, rev
 
 async function main() {
   try {
-    const response = await fetch('https://api.thegraph.com/subgraphs/name/froid1911/aavegotchi-lending', {
+    const response = await fetch('https://api.thegraph.com/subgraphs/name/aavegotchi/aavegotchi-core-matic', {
       method: 'POST',
       body: JSON.stringify({ query }),
     });
