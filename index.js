@@ -1,8 +1,8 @@
-// author https://t.me/scamushka
+// Author: https://t.me/scamushka
 import 'dotenv/config';
 import ethers from 'ethers';
-import fetch from 'node-fetch';
 import { setTimeout } from 'timers/promises';
+import fetch from 'node-fetch';
 import logger from './logger.js';
 
 const provider = new ethers.providers.JsonRpcProvider(process.env.RPC);
